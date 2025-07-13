@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@100..800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+    }
+
+    .anek-malayalam {
+      font-family: "Anek Malayalam", sans-serif;
+      font-style: normal;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="relative w-[650px] h-[650px] overflow-hidden  shadow-lg bg-black">
+
+    <div id="dateBox" class="bg-white z-50 absolute my-4 px-4 flex gap-1 font-bold"></div>
+
+    <!-- Replaced background div with img tag -->
+     <div class="absolute right-0 w-[100%] h-[450px] object-cover">
+        <div class="relative h-[450px]">
+
+        
+    <img id="bgImage" class=" grayscale  w-[100%]  h-full object-cover filter " alt="News Image" />
+    <div class="w-full h-[100px] absolute bottom-0  bg-gradient-to-t from-black via-black/50 to-black/0">
+</div>
+    </div>
+
+     </div>
+
+    <!-- Overlay panel on left -->
+    <div class="absolute inset-y-0 left-0 max-w-full bg-gradient-to-t from-black/80 via-black/60 to-black/0 p-8 text-white flex flex-col justify-end">
+      <h1 class="text-4xl font-extrabold mb-2 text-yellow-400  w-fit p-2">LATEST NEWS</h1>
+      
+
+      <div id="newsTitle" class="text-4xl border-b-2 border-t-2 border-white py-4 font-extrabold text-gray-200 mb-8 w-full anek-malayalam">
+        Loading...
+      </div>
+
+     
+     <p id="caption" class="hidden"></p>
+    
+    </div>
+    <div class="text-white absolute bottom-4 right-10 ">   
+       <h1 class="text-center">FOLLOW US:  KERALATIMES_</h1>     
+    </div>
+
+    
+  </div>
+
+  <script>
+    async function fetchNewsData() {
+      try {
+        const response = await axios.get("http://localhost:4000/api/news/latest/latest");
+        const article = response.data[0];
+        console.log(response);
+        
+
+        const titleElement = document.getElementById("newsTitle");
+        titleElement.innerHTML = article.title || "ശീർഷകം ലഭ്യമല്ല";
+
+        const baseImageUrl = article.image?.split('?')[0];
+        const cleanImageUrl = baseImageUrl ? `${baseImageUrl}?w=650&h=650` : "https://cdn.pixabay.com/photo/2023/01/08/14/22/sample-7705346_640.jpg";
+
+        document.getElementById("bgImage").src = cleanImageUrl;
+        document.getElementById('caption').innerHTML=article.summary
+      } catch (error) {
+        document.getElementById("newsTitle").innerHTML = `⚠️ വാർത്ത ലഭ്യമായില്ല`;
+        console.error("Error loading news:", error);
+      }
+    }
+    function setTodayDate() {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.toLocaleString('default', { month: 'long' }).toUpperCase();
+    const year = today.getFullYear();
+    document.getElementById("dateBox").innerHTML = `<span>${day}</span><span>${month}</span><span>${year}</span>`;
+  }
+
+  setTodayDate(); // Call on page load
+
+    fetchNewsData();
+  </script>
+</body>
+
+</html>
