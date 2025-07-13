@@ -82,7 +82,7 @@ const clearOldScreenshots = () => {
 // };
 
 exports.captureScreenshot = async (req, res) => {
-  const url = "http://127.0.0.1:5500/index3.html";
+  const url = "https://adarshuk01.github.io/keralatimes/";
 
   try {
     const browser = await puppeteer.launch({
