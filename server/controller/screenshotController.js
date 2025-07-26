@@ -102,7 +102,7 @@ exports.captureScreenshot = async (req, res) => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Get caption/title text from inside the news card
-    const caption = await page.$eval("#newsCard h1", (el) =>
+   const caption = await page.$eval("#newsSummary p", (el) =>
       el.innerText.trim()
     );
 
