@@ -94,24 +94,22 @@ exports.captureScreenshot = async (req, res) => {
     await page.goto(url, { waitUntil: "networkidle2" });
     await page.setViewport({ width: 900, height: 900 });
 
-    // Wait for target element to appear
-    await page.waitForSelector(
-      'div.relative.w-\\[650px\\].h-\\[650px\\].overflow-hidden.shadow-lg.bg-black'
+    // Wait for the news card to appear
+    await page.waitForSelector("#newsCard");
+    const element = await page.$("#newsCard");
+
+    // Wait an extra 2 seconds for fonts/images/rendering
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Get caption/title text from inside the news card
+    const caption = await page.$eval("#newsCard h1", (el) =>
+      el.innerText.trim()
     );
-    const element = await page.$(
-      'div.relative.w-\\[650px\\].h-\\[650px\\].overflow-hidden.shadow-lg.bg-black'
-    );
 
-    // Wait an extra 2 seconds to ensure fonts/images/rendering is done
-   await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Get hidden caption text
-    const caption = await page.$eval("#caption", (el) => el.innerText.trim());
-
-    // Clear old screenshots
+    // Clear old screenshots (optional helper function)
     clearOldScreenshots();
 
-    // Capture screenshot
+    // Take screenshot
     const imageName = `news-${Date.now()}.png`;
     const imagePath = path.join(screenshotDir, imageName);
     await element.screenshot({ path: imagePath });
@@ -140,7 +138,7 @@ exports.captureScreenshot = async (req, res) => {
 
     const videoUrl = uploadResult.secure_url;
 
-    // Post to Instagram
+    // Post to Instagram with caption and hashtags
     await postReelToInstagram(
       videoUrl,
       `${caption}... \n\n #gaintrick #thrissur #photooftheday #entekeralam #trivandrum #likeforfollow #keralaattraction #byelection #election #like #instadaily #tamil #keraladiaries #travel #malayalamcinema #chuvadelikes #follow #delhi #followforfollowback #mohanlal #gaintrain #naturephotography #gainparty #nilambur #keralaphotography #followtrain #bangalore #model #karnataka #travelphotography`
@@ -152,7 +150,6 @@ exports.captureScreenshot = async (req, res) => {
       message: "Screenshot converted to video and posted as Reel",
       cloudinaryUrl: videoUrl,
     });
-
   } catch (err) {
     console.error("❌ Error:", err);
     res.status(500).json({ error: "Failed to process screenshot as video" });
