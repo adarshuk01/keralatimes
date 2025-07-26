@@ -1,102 +1,147 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ml">
 
 <head>
   <meta charset="UTF-8" />
+  <title>News Display</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Malayalam:wght@100..900&display=swap"
+    rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@100..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWtPyhA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
-    body {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Oswald', sans-serif;
-    }
-
-    .anek-malayalam {
+    .malayalamfont {
       font-family: "Anek Malayalam", sans-serif;
+      font-weight: 700;
       font-style: normal;
+      font-variation-settings: "wdth" 100;
     }
   </style>
 </head>
 
-<body>
-  <div class="relative w-[650px] h-[650px] overflow-hidden  shadow-lg bg-black">
+<body class="flex  flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
 
-    <div id="dateBox" class="bg-white z-50 absolute my-4 px-4 flex gap-1 font-bold"></div>
+  <div id="newsContainer" class="w-fit mx-auto"></div>
 
-    <!-- Replaced background div with img tag -->
-     <div class="absolute right-0 w-[100%] h-[450px] object-cover">
-        <div class="relative h-[450px]">
-
-        
-    <img id="bgImage" class="   w-[100%]  h-full object-cover filter " alt="News Image" />
-    <div class="w-full h-[100px] absolute bottom-0  bg-gradient-to-t from-black via-black/50 to-black/0">
-</div>
-    </div>
-
-     </div>
-
-    <!-- Overlay panel on left -->
-    <div class="absolute inset-y-0 left-0 max-w-full bg-gradient-to-t from-black/80 via-black/60 to-black/0 p-8 text-white flex flex-col justify-end">
-      <h1 class="text-4xl font-extrabold mb-2 text-yellow-400  w-fit p-2">LATEST NEWS</h1>
-      
-
-      <div id="newsTitle" class="text-4xl border-b-2 border-t-2 border-white py-4 font-extrabold text-gray-200 mb-8 w-full anek-malayalam">
-        Loading...
-      </div>
-
-     
-     <p id="caption" class="hidden"></p>
-    
-    </div>
-    <div class="text-white absolute bottom-4 right-10 ">   
-       <h1 class="text-center">FOLLOW US:  KERALATIMES_</h1>     
-    </div>
-
-    
+  <div id="loader" class="hidden text-center mt-6 text-red-600 font-semibold text-lg">
+    ⏳ Uploading to Instagram...
   </div>
 
+  <button onclick="postToInstagram()" id="postButton"
+    class="bg-gradient-to-r from-red-700 to-red-500 hover:from-red-800 hover:to-red-600 text-yellow-300 font-bold py-3 px-6 rounded-lg shadow-md mt-6 transition duration-300 ease-in-out">
+    POST THIS NEWS
+  </button>
+
   <script>
-    async function fetchNewsData() {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const indianDate = `${day}-${month}-${year}`;
+    let latestArticle = null;
+
+    async function loadNews() {
+      const container = document.getElementById("newsContainer");
       try {
         const response = await axios.get("https://keralatimes.onrender.com/api/news/latest/latest");
-        const article = response.data[0];
-        console.log(response);
-        
+        latestArticle = response.data[0]; // Adjust index if needed
+        const baseImageUrl = latestArticle.image?.split('?')[0];
+        console.log(baseImageUrl);
 
-        const titleElement = document.getElementById("newsTitle");
-        titleElement.innerHTML = article.title || "ശീർഷകം ലഭ്യമല്ല";
+        const cleanImageUrl = baseImageUrl ? `${baseImageUrl}?w=650&h=550` : "https://cdn.pixabay.com/photo/2023/01/08/14/22/sample-7705346_640.jpg";
 
-        const baseImageUrl = article.image?.split('?')[0];
-        const cleanImageUrl = baseImageUrl ? `${baseImageUrl}?w=650&h=650` : "https://cdn.pixabay.com/photo/2023/01/08/14/22/sample-7705346_640.jpg";
+        container.innerHTML = `
+                <div id="newsCard" class="relative w-[650px] h-[650px] shadow-xl overflow-hidden flex flex-col bg-cover bg-center"
+                    style="background-image: url('${cleanImageUrl}')">
 
-        document.getElementById("bgImage").src = cleanImageUrl;
-        document.getElementById('caption').innerHTML=article.summary
+                    <div class="absolute top-0 -left-0 w-full p-4 flex justify-between items-center text-white z-20 bg-gradient-to-b from-black/70 to-transparent">
+                        <span class="font-semibold text-lg -ml-4 border-b-2 shadow-sm border-white px-3 py-1 bg-black/30 rounded-r-full">${indianDate}</span>
+                        <span class="font-bold text-xl">${latestArticle.source || 'KeralaTimes'}</span>
+                    </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#1c0000e0] via-[#2a0000aa] to-transparent z-0"></div>
+
+                    <div class="relative z-10 w-full mt-auto text-center p-4 pb-20"> 
+                        <div class="rounded-lg py-6">
+                            <p class="font-semibold mb-2 text-xl text-white">KeralaTimes</p>
+                            <h1 class="text-4xl px-8 tracking-tight  leading-tight malayalamfont text-yellow-300 drop-shadow-md">
+                                ${latestArticle.title || 'No title available'}
+                            </h1>
+                        </div>
+                       <div id="newsSummary" class="hidden">
+                          <p>${latestArticle.summary || ''}</p>
+                      </div>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 w-full bg-white px-4 py-3 flex items-center justify-between text-gray-800 z-30">
+                        <div class="flex items-center gap-2 ">
+                            <span class="font-semibold text-base">KeralaTimes</span> </div>
+
+                        <div class="flex items-center border-r-2 border-white   p-2 gap-2 ">
+                            <span class=" uppercase  text-sm font-semibold">Follow Us</span>
+                            <a href="#" class="bg-[#1877F2] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="bg-gradient-to-tr -ml-3 from-[#feda75] via-[#fa7e1e] to-[#d62976] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="bg-black text-white  -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="X (Twitter)">
+                                <i class="fab fa-x-twitter"></i>
+                            </a>
+                            <a href="#" class="bg-[#FF0000] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="YouTube">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            <a href="#" class="bg-[#0088cc] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Telegram">
+                                <i class="fab fa-telegram-plane"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                `;
       } catch (error) {
-        document.getElementById("newsTitle").innerHTML = `⚠️ വാർത്ത ലഭ്യമായില്ല`;
-        console.error("Error loading news:", error);
+        console.error("Failed to load article:", error);
+        container.innerHTML = `
+                    <div class="text-red-500 font-semibold text-center p-6 bg-white rounded-lg shadow-md">
+                        ⚠️ Failed to load news article. ${error.message}
+                    </div>
+                `;
       }
     }
-    function setTodayDate() {
-    const today = new Date();
-    const day = today.getDate();
-    const month = today.toLocaleString('default', { month: 'long' }).toUpperCase();
-    const year = today.getFullYear();
-    document.getElementById("dateBox").innerHTML = `<span>${day}</span><span>${month}</span><span>${year}</span>`;
-  }
 
-  setTodayDate(); // Call on page load
+    async function postToInstagram() {
+      const loader = document.getElementById("loader");
+      const button = document.getElementById("postButton");
 
-    fetchNewsData();
+      loader.classList.remove("hidden");
+      button.disabled = true;
+      button.innerText = "Posting...";
+
+      try {
+        const res = await axios.get("https://newsapp-production-d6ef.up.railway.app/api/news/screenshot");
+        console.log("Success:", res.data);
+        alert("✅ News posted to Instagram (via API).");
+      } catch (err) {
+        console.error("Error:", err);
+        alert("❌ Failed to post news to Instagram.");
+      } finally {
+        loader.classList.add("hidden");
+        button.disabled = false;
+        button.innerText = "POST THIS NEWS";
+      }
+    }
+
+    loadNews();
   </script>
+
 </body>
 
 </html>
