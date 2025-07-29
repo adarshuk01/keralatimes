@@ -28,7 +28,7 @@
   </style>
 </head>
 
-<body class="flex  flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
 
   <div id="newsContainer" class="w-fit mx-auto"></div>
 
@@ -57,63 +57,65 @@
         const baseImageUrl = latestArticle.image?.split('?')[0];
         console.log(baseImageUrl);
 
+        // Ensure the image URL includes the w and h parameters for consistent sizing
         const cleanImageUrl = baseImageUrl ? `${baseImageUrl}?w=650&h=550` : "https://cdn.pixabay.com/photo/2023/01/08/14/22/sample-7705346_640.jpg";
 
         container.innerHTML = `
-                <div id="newsCard" class="relative w-[650px] h-[650px] shadow-xl overflow-hidden flex flex-col bg-cover bg-center"
-                    style="background-image: url('${cleanImageUrl}')">
+          <div id="newsCard" class="relative w-[650px] h-[650px] shadow-xl overflow-hidden flex flex-col bg-black">
+            <div class="relative h-[calc(100%-100px)]"> <img src="${cleanImageUrl}" alt="News Image" class="absolute inset-0 w-full h-full object-cover z-0">
+              <div class="absolute bottom-0 left-0 w-full h-[170px] bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+            </div>
 
-                    <div class="absolute top-0 -left-0 w-full p-4 flex justify-between items-center text-white z-20 bg-gradient-to-b from-black/70 to-transparent">
-                        <span class="font-semibold text-lg -ml-4 border-b-2 shadow-sm border-white px-3 py-1 bg-black/30 rounded-r-full">${indianDate}</span>
-                        <span class="font-bold text-xl">${latestArticle.source || 'KeralaTimes'}</span>
-                    </div>
+            <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center text-white z-30 bg-gradient-to-b from-black/70 to-transparent">
+              <span class="font-semibold text-lg -ml-4 border-b-2 shadow-sm border-white px-3 py-1 bg-black/30 rounded-r-full">${indianDate}</span>
+              <span class="font-bold text-xl">${latestArticle.source || 'KeralaTimes'}</span>
+            </div>
 
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#1c0000e0] via-[#2a0000aa] to-transparent z-0"></div>
+            <div class="relative z-20 w-full text-center pb-14 p-6" style="margin-top: -100px;"> 
+              <div class="rounded-lg py-6">
+                <p class="font-semibold mb-2 text-xl text-white">KeralaTimes</p>
+                <h1 class="text-4xl px-8 tracking-tight leading-tight malayalamfont text-yellow-300 drop-shadow-md">
+                  ${latestArticle.title || 'No title available'}
+                </h1>
+              </div>
+              <div id="newsSummary" class="hidden">
+                <p>${latestArticle.summary || ''}</p>
+              </div>
+            </div>
 
-                    <div class="relative z-10 w-full mt-auto text-center p-4 pb-20"> 
-                        <div class="rounded-lg py-6">
-                            <p class="font-semibold mb-2 text-xl text-white">KeralaTimes</p>
-                            <h1 class="text-4xl px-8 tracking-tight  leading-tight malayalamfont text-yellow-300 drop-shadow-md">
-                                ${latestArticle.title || 'No title available'}
-                            </h1>
-                        </div>
-                       <div id="newsSummary" class="hidden">
-                          <p>${latestArticle.summary || ''}</p>
-                      </div>
-                    </div>
+            <div class="absolute bottom-0 left-0 w-full  px-4 py-3 flex items-center justify-between text-white z-40">
+              <div class="flex items-center gap-2 ">
+                <span class="font-semibold text-base">KeralaTimes</span> 
+              </div>
 
-                    <div class="absolute bottom-0 left-0 w-full bg-white px-4 py-3 flex items-center justify-between text-gray-800 z-30">
-                        <div class="flex items-center gap-2 ">
-                            <span class="font-semibold text-base">KeralaTimes</span> </div>
-
-                        <div class="flex items-center border-r-2 border-white   p-2 gap-2 ">
-                            <span class=" uppercase  text-sm font-semibold">Follow Us</span>
-                            <a href="#" class="bg-[#1877F2] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="bg-gradient-to-tr -ml-3 from-[#feda75] via-[#fa7e1e] to-[#d62976] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Instagram">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                            <a href="#" class="bg-black text-white  -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="X (Twitter)">
-                                <i class="fab fa-x-twitter"></i>
-                            </a>
-                            <a href="#" class="bg-[#FF0000] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="YouTube">
-                                <i class="fab fa-youtube"></i>
-                            </a>
-                            <a href="#" class="bg-[#0088cc] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Telegram">
-                                <i class="fab fa-telegram-plane"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                `;
+              <div class="flex items-center p-2 gap-2 ">
+                <span class="uppercase text-sm font-semibold">Follow Us</span>
+                <a href="#" class="bg-[#1877F2] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Facebook">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="bg-gradient-to-tr -ml-3 from-[#feda75] via-[#fa7e1e] to-[#d62976] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Instagram">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="bg-black text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="X (Twitter)">
+                  <i class="fab fa-x-twitter"></i>
+                </a>
+                <a href="#" class="bg-[#FF0000] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="YouTube">
+                  <i class="fab fa-youtube"></i>
+                </a>
+                <a href="#" class="bg-[#0088cc] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Telegram">
+                  <i class="fab fa-telegram-plane"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
       } catch (error) {
         console.error("Failed to load article:", error);
         container.innerHTML = `
-                    <div class="text-red-500 font-semibold text-center p-6 bg-white rounded-lg shadow-md">
-                        ⚠️ Failed to load news article. ${error.message}
-                    </div>
-                `;
+            <div class="text-red-500 font-semibold text-center p-6 bg-white rounded-lg shadow-md">
+              ⚠️ Failed to load news article. ${error.message}
+            </div>
+          `;
       }
     }
 
