@@ -62,7 +62,7 @@
 
         container.innerHTML = `
          <div id="newsCard"
-  class="relative w-[650px] h-[650px] overflow-hidden bg-black shadow-2xl rounded-xl border border-white/10">
+  class="relative w-[650px] h-[650px] overflow-hidden bg-black shadow-2xl  border border-white/10">
 
   <!-- Background Image -->
   <img
@@ -98,35 +98,6 @@
                 <p>${latestArticle.summary || ''}</p>
               </div>
 
-  <!-- Footer -->
-  <div
-    class="absolute bottom-0 left-0 w-full px-5 py-4 flex items-center justify-between text-white z-40 bg-gradient-to-t from-black/90 to-transparent">
-
-    <!-- Brand -->
-    <div class="flex items-center gap-2">
-      <span class="text-base font-bold tracking-wide">KeralaTimes</span>
-    </div>
-
-    <!-- Social Icons -->
-    <div class="flex items-center gap-3">
-      <a class="w-8 h-8 bg-[#1877F2] rounded-full flex items-center justify-center hover:scale-110 transition">
-        <i class="fab fa-facebook-f text-sm"></i>
-      </a>
-      <a
-        class="w-8 h-8 bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] to-[#d62976] rounded-full flex items-center justify-center hover:scale-110 transition">
-        <i class="fab fa-instagram text-sm"></i>
-      </a>
-      <a class="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:scale-110 transition">
-        <i class="fab fa-x-twitter text-sm"></i>
-      </a>
-      <a class="w-8 h-8 bg-[#FF0000] rounded-full flex items-center justify-center hover:scale-110 transition">
-        <i class="fab fa-youtube text-sm"></i>
-      </a>
-      <a class="w-8 h-8 bg-[#0088cc] rounded-full flex items-center justify-center hover:scale-110 transition">
-        <i class="fab fa-telegram-plane text-sm"></i>
-      </a>
-    </div>
-  </div>
 </div>
 
         `;
