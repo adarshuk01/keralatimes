@@ -61,52 +61,70 @@
         const cleanImageUrl = baseImageUrl ? `${baseImageUrl}?w=650&h=550` : "https://cdn.pixabay.com/photo/2023/01/08/14/22/sample-7705346_640.jpg";
 
         container.innerHTML = `
-          <div id="newsCard" class="relative w-[650px] h-[650px] shadow-xl overflow-hidden flex flex-col bg-black">
-            <div class="relative h-full"> <img src="${cleanImageUrl}" alt="News Image" class="absolute inset-0 w-full h-full object-cover z-0">
-              <div class="absolute bottom-0 left-0 w-full h-[170px] bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
-            </div>
+         <div id="newsCard"
+  class="relative w-[650px] h-[650px] overflow-hidden bg-black shadow-2xl rounded-xl border border-white/10">
 
-            <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center text-white z-30 bg-gradient-to-b from-black/70 to-transparent">
-              <span class="font-semibold text-lg -ml-4 border-b-2 shadow-sm border-white px-3 py-1 bg-black/30 rounded-r-full">${indianDate}</span>
-              <span class="font-bold text-xl">${latestArticle.source || 'KeralaTimes'}</span>
-            </div>
+  <!-- Background Image -->
+  <img
+    src="${cleanImageUrl}"
+    alt="News Image"
+    class="absolute inset-0 w-full h-full object-cover" />
 
-            <div class="relative z-20 w-full  pb-14 p-6" style="margin-top: -100px;"> 
-              <div class="rounded-lg py-6 pl-4">
-                <h1 class="text-4xl px-2  tracking-tight leading-tight malayalamfont text-white drop-shadow-md">
-                  ${latestArticle.title || 'No title available'}
-                </h1>
-              </div>
-              <div id="newsSummary" class="hidden">
-                <p>${latestArticle.summary || ''}</p>
-              </div>
-            </div>
+  <!-- Dark Overlay -->
+  <div class="absolute inset-0 bg-black/40"></div>
 
-            <div class="absolute bottom-0 left-0 w-full  px-4 py-3 flex items-center justify-between text-white z-40">
-              <div class="flex items-center gap-2 ">
-                <span class="font-semibold text-base">KeralaTimes</span> 
-              </div>
+  <!-- Top Bar -->
+  <div
+    class="absolute top-0 left-0 w-full px-5 py-4 flex justify-between items-center text-white z-20 bg-gradient-to-b from-black/80 to-transparent">
+    <span
+      class="text-sm font-semibold tracking-wide bg-red-700 px-3 py-1 rounded-full shadow">
+      ${indianDate}
+    </span>
+    <span class="text-lg font-bold tracking-wide uppercase">
+      ${latestArticle.source || "Kerala Times"}
+    </span>
+  </div>
 
-              <div class="flex items-center p-2 gap-2 ">
-                <span class="uppercase text-sm font-semibold">Follow Us</span>
-                <a href="#" class="bg-[#1877F2] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Facebook">
-                  <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="bg-gradient-to-tr -ml-3 from-[#feda75] via-[#fa7e1e] to-[#d62976] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Instagram">
-                  <i class="fab fa-instagram"></i>
-                </a>
-                <a href="#" class="bg-black text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="X (Twitter)">
-                  <i class="fab fa-x-twitter"></i>
-                </a>
-                <a href="#" class="bg-[#FF0000] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="YouTube">
-                  <i class="fab fa-youtube"></i>
-                </a>
-                <a href="#" class="bg-[#0088cc] text-white -ml-3 rounded-full w-7 h-7 flex items-center justify-center text-sm transition-transform duration-200 hover:scale-110" aria-label="Telegram">
-                  <i class="fab fa-telegram-plane"></i>
-                </a>
-              </div>
-            </div>
-          </div>
+  <!-- Headline Card -->
+  <div
+    class="absolute bottom-20 left-1/2 -translate-x-1/2 w-[90%] z-30 bg-black/70 backdrop-blur-md rounded-xl px-6 py-5 border border-white/10">
+    <h1
+      class="text-[34px] leading-tight tracking-tight text-white malayalamfont drop-shadow-lg">
+      ${latestArticle.title || "No title available"}
+    </h1>
+  </div>
+
+  <!-- Footer -->
+  <div
+    class="absolute bottom-0 left-0 w-full px-5 py-4 flex items-center justify-between text-white z-40 bg-gradient-to-t from-black/90 to-transparent">
+
+    <!-- Brand -->
+    <div class="flex items-center gap-2">
+      <span class="text-base font-bold tracking-wide">KeralaTimes</span>
+    </div>
+
+    <!-- Social Icons -->
+    <div class="flex items-center gap-3">
+      <a class="w-8 h-8 bg-[#1877F2] rounded-full flex items-center justify-center hover:scale-110 transition">
+        <i class="fab fa-facebook-f text-sm"></i>
+      </a>
+      <a
+        class="w-8 h-8 bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] to-[#d62976] rounded-full flex items-center justify-center hover:scale-110 transition">
+        <i class="fab fa-instagram text-sm"></i>
+      </a>
+      <a class="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:scale-110 transition">
+        <i class="fab fa-x-twitter text-sm"></i>
+      </a>
+      <a class="w-8 h-8 bg-[#FF0000] rounded-full flex items-center justify-center hover:scale-110 transition">
+        <i class="fab fa-youtube text-sm"></i>
+      </a>
+      <a class="w-8 h-8 bg-[#0088cc] rounded-full flex items-center justify-center hover:scale-110 transition">
+        <i class="fab fa-telegram-plane text-sm"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
         `;
       } catch (error) {
         console.error("Failed to load article:", error);
