@@ -1,32 +1,141 @@
 // services/instagramService.js
 
-const axios = require('axios');
-const fs = require('fs');
-const FormData = require('form-data');
-require('dotenv').config();
+const axios = require("axios");
+require("dotenv").config();
 
-// Replace with actual values
+const PAGE_ID = process.env.FB_PAGE_ID;
+const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/* -----------------------------------
+   CHECK VIDEO STATUS
+----------------------------------- */
+async function checkVideoStatus(videoId) {
+  const res = await axios.get(`https://graph.facebook.com/v25.0/${videoId}`, {
+    params: {
+      fields: "status,permalink_url",
+      access_token: PAGE_ACCESS_TOKEN,
+    },
+  });
+
+  return res.data;
+}
+
+/* -----------------------------------
+   POST FACEBOOK REEL
+----------------------------------- */
+async function postReelToFacebook(videoUrl, caption) {
+  try {
+    console.log("📤 Starting Facebook Reel upload...");
+
+    /* STEP 1 — START */
+    const startRes = await axios.post(
+      `https://graph.facebook.com/v25.0/${PAGE_ID}/video_reels`,
+      {
+        upload_phase: "start",
+        access_token: PAGE_ACCESS_TOKEN,
+      }
+    );
+
+    const uploadUrl = startRes.data.upload_url;
+    const videoId = startRes.data.video_id;
+
+    console.log("✅ Upload URL received");
+
+    /* STEP 2 — DOWNLOAD VIDEO */
+    const videoRes = await axios.get(videoUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const videoBuffer = Buffer.from(videoRes.data);
+    const videoSize = videoBuffer.length; // ✅ defined here
+
+    /* STEP 3 — UPLOAD VIDEO */
+    await axios.post(uploadUrl, videoBuffer, {
+      headers: {
+        Authorization: `OAuth ${PAGE_ACCESS_TOKEN}`,
+        offset: "0",
+        file_size: String(videoSize),        // ✅ must be string or axios drops it
+        "Content-Type": "application/octet-stream",
+        "Content-Length": String(videoSize), // ✅ explicit string for safety
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
+
+    console.log("✅ Video uploaded");
+
+    /* STEP 4 — FINISH + PUBLISH */
+    const finishRes = await axios.post(
+      `https://graph.facebook.com/v25.0/${PAGE_ID}/video_reels`,
+      {
+        upload_phase: "finish",
+        video_id: videoId,
+        description: caption,
+        published: true,
+        video_state: "PUBLISHED",
+        privacy: { value: "EVERYONE" }, 
+        access_token: PAGE_ACCESS_TOKEN,
+      }
+    );
+
+    console.log("✅ Facebook Reel submitted:", finishRes.data);
+
+    /* STEP 5 — WAIT UNTIL FULLY PUBLISHED */
+    let data;
+    let publishingStatus = "not_started";
+
+    while (publishingStatus !== "complete") {
+      await sleep(8000);
+
+      data = await checkVideoStatus(videoId);
+
+      const status = data.status;
+
+      console.log("📊 Video Status:", status.video_status);
+      console.log("Uploading:", status.uploading_phase?.status);
+      console.log("Processing:", status.processing_phase?.status);
+      console.log("Publishing:", status.publishing_phase?.status);
+
+      publishingStatus = status.publishing_phase?.status;
+    }
+
+    console.log("🎉 Reel is fully published!");
+
+    const reelUrl = data.permalink_url.startsWith("http")
+      ? data.permalink_url
+      : `https://www.facebook.com${data.permalink_url}`;
+
+    console.log("🔗 Reel URL:", reelUrl);
+
+    return {
+      postId: finishRes.data.post_id,
+      videoId,
+      reelUrl,
+    };
+  } catch (error) {
+    console.error(
+      "❌ Facebook Reel error:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+/* --------------------------------------------------
+   INSTAGRAM IMAGE POST
+-------------------------------------------------- */
+
 const ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN;
 const IG_USER_ID = process.env.INSTAGRAM_USER_ID;
-console.log('ACCESS_TOKEN :',ACCESS_TOKEN);
 
-
-/**
- * Post an image to Instagram (via public URL).
- * @param {string} imageUrl - The public URL of the image.
- * @param {string} caption - Caption for the Instagram post.
- */
 async function postToInstagram(imageUrl, caption) {
-  console.log('imageUrl',imageUrl);
-  
   try {
-    // Step 1: Upload image to Instagram container
     const form = new FormData();
-    form.append('image_url', imageUrl);
-    form.append('caption', caption);
-    form.append('access_token', ACCESS_TOKEN);
-    console.log(ACCESS_TOKEN);
-    
+    form.append("image_url", imageUrl);
+    form.append("caption", caption);
+    form.append("access_token", ACCESS_TOKEN);
 
     const containerRes = await axios.post(
       `https://graph.facebook.com/v18.0/${IG_USER_ID}/media`,
@@ -36,7 +145,6 @@ async function postToInstagram(imageUrl, caption) {
 
     const containerId = containerRes.data.id;
 
-    // Step 2: Publish image
     const publishRes = await axios.post(
       `https://graph.facebook.com/v18.0/${IG_USER_ID}/media_publish`,
       {
@@ -45,24 +153,28 @@ async function postToInstagram(imageUrl, caption) {
       }
     );
 
-    console.log('✅ Instagram post published:', publishRes.data);
-    return publishRes.data;
+    console.log("✅ Instagram image posted:", publishRes.data);
 
+    return publishRes.data;
   } catch (err) {
-    console.error('❌ Failed to post to Instagram:', err.response?.data || err.message);
+    console.error(
+      "❌ Instagram image error:",
+      err.response?.data || err.message
+    );
     throw err;
   }
-
 }
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/* --------------------------------------------------
+   INSTAGRAM REEL POST
+-------------------------------------------------- */
 
 async function postReelToInstagram(videoUrl, caption) {
   try {
-    // Step 1: Create Media Container
     const creationRes = await axios.post(
       `https://graph.facebook.com/v18.0/${IG_USER_ID}/media`,
       {
-        media_type: 'REELS',
+        media_type: "REELS",
         video_url: videoUrl,
         caption: caption,
         access_token: ACCESS_TOKEN,
@@ -70,45 +182,40 @@ async function postReelToInstagram(videoUrl, caption) {
     );
 
     const creationId = creationRes.data.id;
-    console.log('✅ Media creation ID:', creationId);
 
-    // Step 2: Poll for processing completion
+    console.log("🎬 Instagram Reel container:", creationId);
+
+    // WAIT UNTIL READY
     let isReady = false;
     let attempt = 0;
-    const maxAttempts = 15; // Up to ~2 mins
-    const baseDelay = 3000;
 
-    while (attempt < maxAttempts) {
+    while (!isReady && attempt < 15) {
       attempt++;
-      await sleep(baseDelay * attempt); // exponential backoff
-      try {
-        const statusRes = await axios.get(
-          `https://graph.facebook.com/v18.0/${creationId}?fields=status_code&access_token=${ACCESS_TOKEN}`
-        );
 
-        const status = statusRes.data.status_code;
-        console.log(`⏳ Attempt ${attempt} - Status: ${status}`);
+      await sleep(4000);
 
-        if (status === 'FINISHED') {
-          isReady = true;
-          break;
+      const statusRes = await axios.get(
+        `https://graph.facebook.com/v18.0/${creationId}`,
+        {
+          params: {
+            fields: "status_code",
+            access_token: ACCESS_TOKEN,
+          },
         }
+      );
 
-        if (status === 'ERROR') {
-          throw new Error('Media processing failed at Instagram');
-        }
+      const status = statusRes.data.status_code;
 
-      } catch (err) {
-        console.warn(`⚠️ Status check failed on attempt ${attempt}:`, err.response?.data || err.message);
-        // Continue retrying unless status is error
-      }
+      console.log(`⏳ Instagram processing: ${status}`);
+
+      if (status === "FINISHED") isReady = true;
+
+      if (status === "ERROR")
+        throw new Error("Instagram video processing failed");
     }
 
-    if (!isReady) {
-      throw new Error('Media not ready after waiting');
-    }
+    if (!isReady) throw new Error("Instagram video not ready");
 
-    // Step 3: Publish the Reel
     const publishRes = await axios.post(
       `https://graph.facebook.com/v18.0/${IG_USER_ID}/media_publish`,
       {
@@ -117,18 +224,24 @@ async function postReelToInstagram(videoUrl, caption) {
       }
     );
 
-    console.log('✅ Reel posted successfully:', publishRes.data);
-    return publishRes.data;
+    console.log("✅ Instagram Reel posted:", publishRes.data);
 
+    return publishRes.data;
   } catch (error) {
-    console.error('❌ Error posting to Instagram:', error.response?.data || error.message);
-    throw new Error('Failed to post reel');
+    console.error(
+      "❌ Instagram Reel error:",
+      error.response?.data || error.message
+    );
+    throw error;
   }
 }
 
+/* --------------------------------------------------
+   EXPORTS
+-------------------------------------------------- */
 
-// Export the function
 module.exports = {
   postToInstagram,
-  postReelToInstagram
+  postReelToInstagram,
+  postReelToFacebook,
 };

@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
-const { postToInstagram, postReelToInstagram } = require("../services/postToInstagram");
+const { postToInstagram, postReelToInstagram, postReelToFacebook } = require("../services/postToInstagram");
 const cloudinary = require("../services/cloudinary");
 const ffmpeg = require("fluent-ffmpeg");
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
@@ -138,11 +138,15 @@ exports.captureScreenshot = async (req, res) => {
 
     const videoUrl = uploadResult.secure_url;
 
+       await postReelToFacebook(videoUrl,`${caption}... #gaintrick #thrissur #photooftheday #entekeralam #trivandrum #likeforfollow #keralaattraction #byelection #election #like #instadaily #tamil #keraladiaries #travel #malayalamcinema #chuvadelikes #follow #delhi #followforfollowback #mohanlal #gaintrain #naturephotography #gainparty #nilambur #keralaphotography #followtrain #bangalore #model #karnataka #travelphotography`)
+
     // Post to Instagram with caption and hashtags
     await postReelToInstagram(
       videoUrl,
       `${caption}... \n\n #gaintrick #thrissur #photooftheday #entekeralam #trivandrum #likeforfollow #keralaattraction #byelection #election #like #instadaily #tamil #keraladiaries #travel #malayalamcinema #chuvadelikes #follow #delhi #followforfollowback #mohanlal #gaintrain #naturephotography #gainparty #nilambur #keralaphotography #followtrain #bangalore #model #karnataka #travelphotography`
     );
+
+ 
 
     await browser.close();
 
